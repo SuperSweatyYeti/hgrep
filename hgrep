@@ -13,11 +13,14 @@ Help()
    echo
    echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern"]"
    echo "options:"
-   echo "-e     Pattern to search for"
+   echo "-s     Pattern to search for"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
    echo "-H		Number of Header lines, Default is 1"
    echo
+   echo "Examples:"
+   echo
+   echo "lsblk | hgrep -H 1 -lis nvme0n1"
 }
 
 Help2()
@@ -28,7 +31,7 @@ Help2()
    echo
    echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern"]"
    echo "options:"
-   echo "-e     Pattern to search for"
+   echo "-s     Pattern to search for"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
    echo "-H		Number of Header lines, Default is 1"
@@ -36,7 +39,7 @@ Help2()
    echo
    echo "Examples:"
    echo
-   echo "Show "
+   echo "lsblk | hgrep -H 1 -lis nvme0n1"
    echo
 }
 lflag=false
@@ -84,7 +87,7 @@ then
 	fi
 fi
 
-if (( "$sflag" == true )) 
+if (( "$sflag" == true ))
 then
 	awk 'FNR<=1{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/('"$pattern"')/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'} '
 else
