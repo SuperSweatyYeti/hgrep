@@ -42,15 +42,28 @@ Help2()
    echo "lsblk | hgrep -H 1 -lis nvme0n1"
    echo
 }
+
+NoInput()
+{
+   # Display NoInput
+   echo
+   echo "Need to pass a file or command use -h for help"
+}
+
 lflag=false
 iflag=false
 sflag=false
 eflag=false
 Hflag=false
-no="#"
-while getopts ":h:H:lis:lie:" opt; do
+
+# If number of arguments is 0 Help message
+# if (($# == 0))
+# then
+#    Help
+# fi
+while getopts ":hH:lis:lie:" opt; do
 	case $opt in			
-		h) 		# display Help
+		h) 	# display Help
 				Help 
 				exit;;
 		H) 		headers=$OPTARG; Hflag=true; ;;
@@ -70,7 +83,7 @@ done
 
 if (( OPTIND <= 2 ))
 then
-    echo "Not Enough arguments"
+   echo "Not Enough arguments"
 	echo
 	Help
 	exit
@@ -92,9 +105,21 @@ then
 	headers=1
 fi
 
+
+# Check if stdin is empty otherwise awk will hang
+if [ ! -t 0 ]
+then
+   # echo "stdin has data"
+   : # no-op
+else
+   NoInput
+   exit
+fi
+
+
 if [[ "$sflag" == true ]]
 then
-	awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/('"$pattern"')/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'} '
+	awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
 else
 	Help
 	exit
