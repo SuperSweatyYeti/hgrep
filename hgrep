@@ -56,7 +56,8 @@ iflag=false
 sflag=false
 eflag=false
 Hflag=false
-
+entries=()
+or=''
 # If number of arguments is 0 Help message
 # if (($# == 0))
 # then
@@ -71,7 +72,7 @@ while getopts ":hH:lis:lie:" opt; do
 		l) 		line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; ;;
 		i) 		set="IGNORECASE=1;"; iflag=true;  ;;
 		s) 		pattern=$OPTARG; printer="print"; no=""; sflag=true; ;;
-		e) 		entries=$OPTARG; eflag=true; printer="print";  ;;
+		e) 		entries+=($OPTARG); eflag=true; printer="print";  ;;
 		\?) 	# Invalid option
 				echo "Error: Invalid option"
 				Help
@@ -116,11 +117,33 @@ else
    NoInput
    exit
 fi
+echo "${#entries[@]}"
 
+for (( i=0; i<${#entries[@]}-1; i++ ))
+do
+   echo "$i"
+   entries[i]=(${entries[$i]})'|'
+done
 
-if [[ "$sflag" == true ]]
+echo "${entries[@]}"
+
+#entries="$(awk 'FS="\'" ; OFS=" "' "${entries[@]}" )"
+
+echo "${entries[@]}"
+
+if [[ "$sflag" == true ]] || [[ "$eflag" == true ]] && [[ ! "$pattern" == '' ]] || [[ ! "$entries" == '()|' ]]
 then
-	awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
+   : # no-op
+else
+   echo "Search pattern cannot be empty type -h for help"
+   exit
+fi
+
+echo "${entries[@]}"
+
+if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
+then
+	awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries[@]}"''"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
 else
 	Help
 	exit
