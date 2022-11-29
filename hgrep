@@ -87,9 +87,14 @@ then
 	fi
 fi
 
+if [[  "$Hflag" == false ]]
+then
+	headers=1
+fi
+
 if [[ "$sflag" == true ]]
 then
-	awk 'FNR<=1{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/('"$pattern"')/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'} '
+	awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/('"$pattern"')/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'} '
 else
 	Help
 	exit
