@@ -16,7 +16,7 @@ Help()
    echo "-s     Pattern to search for"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
-   echo "-H     Number of Header lines, Default is 1"
+   echo "-H		Number of Header lines, Default is 1"
    echo
    echo "Examples:"
    echo
@@ -68,15 +68,13 @@ while getopts ":h:H:lis:lie:" opt; do
 	esac
 done
 
-if (( OPTIND <= 2 )) then
+if (( OPTIND <= 2 ))
+then
     echo "Not Enough arguments"
 	echo
 	Help
 	exit
 fi
-
-if 
-
 
 if [[ "$Hflag" == true ]]
 then
@@ -96,8 +94,3 @@ else
 	Help
 	exit
 fi
-
-
-		#m) 		headers=$OPTARG; Hflag=true; ;;
-
-# if (( "$lflag" == true || "$iflag" == true && "$eflag" == true )) 
