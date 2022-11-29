@@ -16,7 +16,7 @@ Help()
    echo "-s     Pattern to search for"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
-   echo "-H		Number of Header lines, Default is 1"
+   echo "-H     Number of Header lines, Default is 1"
    echo
    echo "Examples:"
    echo
@@ -57,10 +57,10 @@ while getopts ":h:H:lis:lie:" opt; do
 		l) 		line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; ;;
 		i) 		set="IGNORECASE=1;"; iflag=true;  ;;
 		s) 		pattern=$OPTARG; printer="print"; no=""; sflag=true; ;;
-		e) 		entries=$OPTARG; eflag=true; ;;
+		e) 		entries=$OPTARG; eflag=true; printer="print";  ;;
 		\?) 	# Invalid option
 				echo "Error: Invalid option"
-				Help2
+				Help
 				exit;;
 		:)		echo "Option -$OPTARG requires an argument." >&2
 				Help
@@ -68,12 +68,14 @@ while getopts ":h:H:lis:lie:" opt; do
 	esac
 done
 
-if ((OPTIND <= 2)) then
-    echo "Invalid arguments"
+if (( OPTIND <= 2 )) then
+    echo "Not Enough arguments"
 	echo
 	Help
 	exit
 fi
+
+if 
 
 
 if [[ "$Hflag" == true ]]
@@ -87,7 +89,7 @@ then
 	fi
 fi
 
-if (( "$sflag" == true ))
+if [[ "$sflag" == true ]]
 then
 	awk 'FNR<=1{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/('"$pattern"')/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'} '
 else
