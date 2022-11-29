@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 
@@ -63,7 +62,7 @@ or=''
 # then
 #    Help
 # fi
-while getopts ":hH:lis:lie:" opt; do
+while getopts ":hH?:lis?:lie?:" opt; do
 	case $opt in			
 		h) 	# display Help
 				Help 
