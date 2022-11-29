@@ -66,7 +66,7 @@ or=''
 # then
 #    Help
 # fi
-while getopts ":hH?:lis?:lie?:" opt; do
+while getopts ":hH:lis:lie:" opt; do
 	case $opt in			
 		h) 	# display Help
 				Help 
@@ -77,7 +77,7 @@ while getopts ":hH?:lis?:lie?:" opt; do
 		s) 		pattern=$OPTARG; printer="print"; no=""; sflag=true; ;;
 		e) 		entries+=($OPTARG); eflag=true; printer="print";  ;;
 		\?) 	# Invalid option
-				echo "Error: Invalid option"
+				echo "Error: Invalid option detected"
 				Help
 				exit;;
 		:)		echo "Option -$OPTARG requires an argument." >&2
