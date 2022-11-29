@@ -1,3 +1,5 @@
 # hgrep
 
-Use awk to grep with headers
+grep with headers!
+
+Leveraging awk.

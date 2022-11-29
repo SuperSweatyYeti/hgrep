@@ -21,6 +21,7 @@ Help()
    echo "Examples:"
    echo
    echo "lsblk | hgrep -H 1 -lis nvme0n1"
+   echo
 }
 
 Help2()
@@ -124,3 +125,5 @@ else
 	Help
 	exit
 fi
+
+# Multiple Entries  (sadf)|(asdf)|(asd)
