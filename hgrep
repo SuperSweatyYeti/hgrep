@@ -12,6 +12,8 @@ Help()
    echo
    echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern"]"
    echo "options:"
+   echo 
+   echo "-h     Display this help message"
    echo "-s     Pattern to search for"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
@@ -31,6 +33,8 @@ Help2()
    echo
    echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern"]"
    echo "options:"
+   echo
+   echo "-h     Display this help message"
    echo "-s     Pattern to search for"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
