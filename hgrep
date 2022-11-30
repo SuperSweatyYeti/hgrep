@@ -17,7 +17,7 @@ Help()
    echo "-s     Pattern to search for"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
-   echo "-H		Number of Header lines, Default is 1"
+   echo "-H     Number of Header lines, Default is 1"
    echo
    echo "Examples:"
    echo
@@ -38,7 +38,7 @@ Help2()
    echo "-s     Pattern to search for"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
-   echo "-H		Number of Header lines, Default is 1"
+   echo "-H     Number of Header lines, Default is 1"
    echo
    echo
    echo "Examples:"
@@ -59,6 +59,7 @@ iflag=false
 sflag=false
 eflag=false
 Hflag=false
+qflag=false
 entries=()
 or=''
 # If number of arguments is 0 Help message
@@ -66,7 +67,7 @@ or=''
 # then
 #    Help
 # fi
-while getopts ":hH:lis:lie:" opt; do
+while getopts ":hH:f:lis:lie:" opt; do
 	case $opt in			
 		h) 	# display Help
 				Help 
@@ -76,8 +77,10 @@ while getopts ":hH:lis:lie:" opt; do
 		i) 		set="IGNORECASE=1;"; iflag=true;  ;;
 		s) 		pattern=$OPTARG; printer="print"; no=""; sflag=true; ;;
 		e) 		entries+=($OPTARG); eflag=true; printer="print";  ;;
-		\?) 	# Invalid option
-				echo "Error: Invalid option detected"
+		f)    myfile=$OPTARG; fflag=true; ;;
+      \?) 	# Invalid option
+            qflag=true
+				echo "Error: Invalid option detected -$OPTARG"
 				Help
 				exit;;
 		:)		echo "Option -$OPTARG requires an argument." >&2
@@ -85,6 +88,7 @@ while getopts ":hH:lis:lie:" opt; do
 				exit;;
 	esac
 done
+shift $(( OPTIND - 0))
 
 if (( OPTIND <= 2 ))
 then
@@ -92,6 +96,11 @@ then
 	echo
 	Help
 	exit
+elif (( OPTIND > 2)) && [[ "$qflag" == true ]]
+then
+   echo "Error: Invalid option detected"
+   Help
+   exit
 fi
 
 if [[ "$Hflag" == true ]]
@@ -110,15 +119,18 @@ then
 	headers=1
 fi
 
-
-# Check if stdin is empty otherwise awk will hang
-if [ ! -t 0 ]
+# CHeck if passing in file name
+if [[ "$fflag" == false ]]
 then
-   # echo "stdin has data"
-   : # no-op
-else
-   NoInput
-   exit
+# Check if stdin is empty otherwise awk will hang
+   if [ ! -t 0 ]
+   then
+      # echo "stdin has data"
+      : # no-op
+   else
+      NoInput
+      exit
+   fi
 fi
 echo "${#entries[@]}"
 
@@ -130,11 +142,12 @@ done
 
 echo "${entries[@]}"
 
-#entries="$(awk 'FS="\'" ; OFS=" "' "${entries[@]}" )"
+# awk 'FS="'" ; OFS=" "' "${entries[@]}"
+# echo "HERE"
 
 echo "${entries[@]}"
 
-if [[ "$sflag" == true ]] || [[ "$eflag" == true ]] && [[ ! "$pattern" == '' ]] || [[ ! "$entries" == '()|' ]]
+if [[ "$sflag" == true ]] || [[ "$eflag" == true ]] && [[ ! "$pattern" == '' ]] || [[ ! "$entries" == '' ]]
 then
    : # no-op
 else
@@ -146,7 +159,12 @@ echo "${entries[@]}"
 
 if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
 then
-	awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries[@]}"''"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
+   if [[ "$fflag" == true ]]
+   then
+	   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries[@]}"''"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}' "$myfile"
+   else
+      awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries[@]}"''"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
+   fi
 else
 	Help
 	exit
