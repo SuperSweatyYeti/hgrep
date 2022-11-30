@@ -90,8 +90,8 @@ while getopts ":hH:f:lis:lie:" opt; do
 done
 shift $(( OPTIND - 0))
 
-echo "HERE HERE"
-echo $OPTIND
+# echo "HERE HERE"
+# echo $OPTIND
 
 if (( OPTIND <= 2 ))
 then
@@ -142,10 +142,10 @@ then
       exit
    fi
 fi
-echo "${entries[@]}"
+# echo "${entries[@]}"
 max="${#entries[@]}"
 maxless=$(("$max" - 1)) 
-echo "$max"
+# echo "$max"
 
 
 for (( i=0; i < "$max"; i++ ))
@@ -172,8 +172,16 @@ done
 
 
 #String Filtering
-echo "${entries[@]}"
-echo "$pattern"
+string="$entries"
+if [[ $string == *\\* ]]; then
+   entries=${entries//\\//}
+fi
+
+
+
+# echo "${entries[@]}"
+# echo "$pattern"
+
 # Strip quotes with sed
 entries=$(echo "${entries[@]}" | sed "s/'/ /g")
 echo "$entries"
@@ -182,7 +190,7 @@ entries=$(echo "$entries" | sed "s/\s//g")
 # escape special characters        //\//\\/
 # entries=$(echo "$entries" | sed "s//\//\\/g")
 # echo "HERE"
-echo "$entries"
+# echo "$entries"
 
 
 if [[ "$sflag" == true ]] || [[ "$eflag" == true ]] && [[ ! "$pattern" == '' ]] || [[ ! "$entries" == '' ]]
@@ -193,7 +201,7 @@ else
    exit
 fi
 
-echo "${entries[@]}"
+# echo "${entries[@]}"
 
 if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
 then
