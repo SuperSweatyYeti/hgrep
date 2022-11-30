@@ -15,6 +15,7 @@ Help()
    echo 
    echo "-h     Display this help message"
    echo "-s     Pattern to search for"
+   echo "-e     Multiple search entries (hgrep -e foo -e bar)"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
    echo "-H     Number of Header lines, Default is 1"
@@ -22,6 +23,7 @@ Help()
    echo "Examples:"
    echo
    echo "lsblk | hgrep -H 1 -lis nvme0n1"
+   echo "hgrep -f /etc/hosts -H 5 -li -e "example.com" -e "acme.com" "
    echo
 }
 
@@ -36,6 +38,7 @@ Help2()
    echo
    echo "-h     Display this help message"
    echo "-s     Pattern to search for"
+   echo "-e     Multiple search entries (hgrep -e foo -e bar)"
    echo "-l     Toggle line numbers"
    echo "-i     Case-insensitive pattern search"
    echo "-H     Number of Header lines, Default is 1"
@@ -68,7 +71,7 @@ or=''
 # then
 #    Help
 # fi
-while getopts ":hH:f:liFs:liFe:" opt; do
+while getopts ":h:f:H:lis:li:e:" opt; do
 	case $opt in			
 		h) 	# display Help
 				Help 
@@ -78,7 +81,7 @@ while getopts ":hH:f:liFs:liFe:" opt; do
 		i) 		set="IGNORECASE=1;"; iflag=true;  ;;
 		s) 		pattern=$OPTARG; printer="print"; no=""; sflag=true; ;;
 		e) 		entries+=($OPTARG); eflag=true; printer="print";  ;;
-		F)    Fflag=true; ;;
+		#F)    Fflag=true; ;;
       f)    myfile=$OPTARG; fflag=true; ;;
       \?) 	# Invalid option
             qflag=true
@@ -90,7 +93,8 @@ while getopts ":hH:f:liFs:liFe:" opt; do
 				exit;;
 	esac
 done
-shift $(( OPTIND - 0))
+echo "$OPTIND"
+shift $(( OPTIND + 0))
 
 # echo "HERE HERE"
 # echo $OPTIND
@@ -152,7 +156,7 @@ maxless=$(("$max" - 1))
 
 for (( i=0; i < "$max"; i++ ))
 do
-   echo "$i"
+   # echo "$i"
    if (( "$i" == "$maxless"  ))
    then
       entries[i]=(${entries[$i]})' '
@@ -172,13 +176,17 @@ done
 #    entry=("$entry")'|'
 # done
 
-
+# Strip parentheses with sed
+entries2=$(echo "${entries[@]}" | sed "s/[()]//g")
 #String Filtering
-# string="$entries"
-# if [[ $string == *\\* ]] && [[ "$Fflag" == false ]]; then
-#    entries=${entries//\\//}
-# fi
-
+string="$entries2"
+if [[ "$string" == "\\" ]] || [[ "$pattern" == "\\" ]]; then
+   echo "does equal"
+   echo "Search pattern cannot be double backlash"
+   echo "Try four backslashes to search for literal backslashes"
+   Help
+   exit
+fi
 
 
 # echo "${entries[@]}"
@@ -186,7 +194,7 @@ done
 
 # Strip quotes with sed
 entries=$(echo "${entries[@]}" | sed "s/'/ /g")
-echo "$entries"
+# echo "$entries"
 # strip empty space with sed
 entries=$(echo "$entries" | sed "s/\s//g")
 # escape special characters        //\//\\/
