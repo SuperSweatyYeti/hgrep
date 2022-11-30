@@ -90,6 +90,9 @@ while getopts ":hH:f:lis:lie:" opt; do
 done
 shift $(( OPTIND - 0))
 
+echo "HERE HERE"
+echo $OPTIND
+
 if (( OPTIND <= 2 ))
 then
    echo "Not Enough arguments"
@@ -99,6 +102,13 @@ then
 elif (( OPTIND > 2)) && [[ "$qflag" == true ]]
 then
    echo "Error: Invalid option detected"
+   Help
+   exit
+fi
+
+if [[ "$sflag" == true ]] && [[ "$eflag" == true ]]
+then
+   echo "Invalid combination of arguments -s -e"
    Help
    exit
 fi
@@ -132,20 +142,48 @@ then
       exit
    fi
 fi
-echo "${#entries[@]}"
+echo "${entries[@]}"
+max="${#entries[@]}"
+maxless=$(("$max" - 1)) 
+echo "$max"
 
-for (( i=0; i<${#entries[@]}-1; i++ ))
+
+for (( i=0; i < "$max"; i++ ))
 do
    echo "$i"
+   if (( "$i" == "$maxless"  ))
+   then
+      entries[i]=(${entries[$i]})' '
+      continue
+   fi
    entries[i]=(${entries[$i]})'|'
 done
 
-echo "${entries[@]}"
+# for entry in "${entries[@]}"
+# do
+#    echo "$entry"
+#    if [[ "$entry" == "$last"  ]]
+#    then
+#       entry=\("$entry"\)
+#       continue
+#    fi
+#    entry=("$entry")'|'
+# done
 
-# awk 'FS="'" ; OFS=" "' "${entries[@]}"
+
+#String Filtering
+echo "${entries[@]}"
+echo "$pattern"
+# Strip quotes with sed
+entries=$(echo "${entries[@]}" | sed "s/'/ /g")
+echo "$entries"
+# strip empty space with sed
+entries=$(echo "$entries" | sed "s/\s//g")
+# escape special characters        //\//\\/
+# entries=$(echo "$entries" | sed "s//\//\\/g")
 # echo "HERE"
+echo "$entries"
 
-echo "${entries[@]}"
 
 if [[ "$sflag" == true ]] || [[ "$eflag" == true ]] && [[ ! "$pattern" == '' ]] || [[ ! "$entries" == '' ]]
 then
@@ -161,9 +199,9 @@ if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
 then
    if [[ "$fflag" == true ]]
    then
-	   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries[@]}"''"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}' "$myfile"
+	   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}' "$myfile"
    else
-      awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries[@]}"''"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
+      awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"$pattern"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
    fi
 else
 	Help
