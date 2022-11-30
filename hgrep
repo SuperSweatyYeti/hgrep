@@ -71,28 +71,38 @@ or=''
 # then
 #    Help
 # fi
-while getopts ":h:f:H:lis:li:e:" opt; do
+
+# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
+# separately; see below.
+while getopts ":h::f:H:lis:li:e:-:" opt; do
+   # support long options: https://stackoverflow.com/a/28466267/519360
+   if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
+      OPT="${OPTARG%%=*}"       # extract long option name
+      OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
+      OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
+   fi
 	case $opt in			
-		h) 	# display Help
-				Help 
-				exit;;
-		H) 		headers=$OPTARG; Hflag=true; ;;
-		l) 		line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; ;;
-		i) 		set="IGNORECASE=1;"; iflag=true;  ;;
-		s) 		pattern=$OPTARG; printer="print"; no=""; sflag=true; ;;
-		e) 		entries+=($OPTARG); eflag=true; printer="print";  ;;
-		#F)    Fflag=true; ;;
-      f)    myfile=$OPTARG; fflag=true; ;;
-      \?) 	# Invalid option
-            qflag=true
-				echo "Error: Invalid option detected -$OPTARG"
-				Help
-				exit;;
-		:)		echo "Option -$OPTARG requires an argument." >&2
-				Help
-				exit;;
+		h | help) 	      # display Help
+				            Help 
+				            exit;;
+		H | headers) 		headers=$OPTARG; Hflag=true; ;;
+		l | lines) 		           line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; ;;
+		i | ignore-case) 	       set="IGNORECASE=1;"; iflag=true;  ;;
+		s | search-pattern) 		 pattern=$OPTARG; printer="print"; no=""; sflag=true; ;;
+		e | multi-search) 		 entries+=($OPTARG); eflag=true; printer="print";  ;;
+		#F)               Fflag=true; ;;
+      f | file)                myfile=$OPTARG; fflag=true; ;;
+      \?) 	            # Invalid option
+                        qflag=true
+                        echo "Error: Invalid option detected -$OPTARG"
+                        Help
+                        exit;;
+      :)		echo "Option -$OPTARG requires an argument." >&2
+                        Help
+                        exit;;
 	esac
 done
+shift $((OPTIND-1)) # remove parsed options and args from $@ list
 echo "$OPTIND"
 shift $(( OPTIND + 0))
 
@@ -180,7 +190,7 @@ done
 entries2=$(echo "${entries[@]}" | sed "s/[()]//g")
 #String Filtering
 string="$entries2"
-if [[ "$string" == "\\" ]] || [[ "$pattern" == "\\" ]]; then
+if [[ "$entries2" == "\\" ]] || [[ "$pattern" == "\\" ]]; then
    echo "does equal"
    echo "Search pattern cannot be double backlash"
    echo "Try four backslashes to search for literal backslashes"
