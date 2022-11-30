@@ -24,7 +24,15 @@ Help()
    echo
    echo "lsblk | hgrep -H 1 -lis nvme0n1"
    echo "hgrep -f /etc/hosts -H 5 -li -e "example.com" -e "acme.com" "
+   echo 
+   echo "Do not use header AND include first line in search results"
+   echo "hgrep -f /etc/hosts -H 0 -s Loopback"
+   echo "Specific Special character searches that need to be preceded by triple backslashes"
+   echo "[\\][|]"
+   echo "Search for literal \\ by using quadruple backslashes"
+   echo "Other special character searches need to be preceded by single \\"
    echo
+  
 }
 
 Help2()
@@ -71,9 +79,10 @@ or=''
 # then
 #    Help
 # fi
-while getopts ":h:f:H:lis:li:e:" opt; do
+while getopts "f:H:lis:lie:h" opt; do
 	case $opt in			
 		h) 	# display Help
+            echo "Showing Help..."
 				Help 
 				exit;;
 		H) 		headers=$OPTARG; Hflag=true; ;;
@@ -207,7 +216,7 @@ if [[ "$sflag" == true ]] || [[ "$eflag" == true ]] && [[ ! "$pattern" == '' ]] 
 then
    : # no-op
 else
-   echo "Search pattern cannot be empty type -h for help"
+   echo "Search pattern cannot be empty use [hgrep -h] for help"
    exit
 fi
 
