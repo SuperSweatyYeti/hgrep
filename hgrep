@@ -71,6 +71,7 @@ lflag=false
 iflag=false
 sflag=false
 eflag=false
+hflag=false
 Hflag=false
 qflag=false
 fflag=false
@@ -84,7 +85,7 @@ or=''
 
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
 # separately; see below.
-TEMP=$(getopt -o hf:H:lis:e: --long shortlist,help,file:,headers:,lines,ignore-case,search:,lines,ignore-case,multi-search: \
+TEMP=$(getopt -o hf:H:lis:e: --long help,file:,headers:,lines,ignore-case,search:,lines,ignore-case,multi-search: \
               -n 'hgrep' -- "$@" )
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
@@ -94,7 +95,7 @@ eval set -- "$TEMP"
 
 while true; do	
    case "$1" in
-		-h | --help) 	           # display help
+		-h | --help) 	           hflag=true # display help
                                 Help
 				                    exit;;
 		-H | --headers) 		     headers="$2"; Hflag=true; shift 2  ;;
@@ -104,11 +105,16 @@ while true; do
 		-e | --multi-search) 	  entries+=("$2"); eflag=true; printer="print"; shift 2  ;;
 		#-F)                      Fflag=true; ;;
       -f | --file)              myfile="$2"; fflag=true; shift 2 ;;
-      --shortlist)
-         # shift 1
-         echo --help --headers --lines --ignore-case --search --multi-search --file
-         exit
-         ;;
+      # --complete)
+      #    # shift 1
+      #    if [[ "$TEMP" == *"help"* ]]; then
+      #    echo 
+      #    exit
+      #    else
+      #    echo --help --headers --lines --ignore-case --search --multi-search --file
+      #    exit
+      #    fi
+      #    ;;
       -- ) shift; break ;;
        * ) break ;;
 	esac
