@@ -24,7 +24,7 @@ Help()
    echo "-H, --headers        Number of Header lines, Default is 1"
    echo
    echo "Example syntax: hgrep -li -f /path/to/myfile -s "pattern" "                    
-   echo "Example syntax: hgrep -H 2 -li -f /etc/hosts -e "example.com" -e "acme.com" 
+   echo "Example syntax: hgrep -H 2 -li -f /etc/hosts -e "example.com" -e "acme.com" "
    echo 
    echo "More Examples: "
    echo "lsblk | hgrep -H 1 -lis nvme0n1"
@@ -38,7 +38,7 @@ Help2()
    echo
    echo "The order to use flags is as follows"
    echo
-   echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern"]"
+   echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern" "
    echo "options:"
    echo
    echo "-h     Display this help message"
