@@ -74,7 +74,7 @@ or=''
 
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
 # separately; see below.
-TEMP=$(getopt -o hfHlise: --long help,file,headers,lines,ignore-case,search,lines,ignore-case,multi-search: \
+TEMP=$(getopt -o hf:H:lis:e: --long help,file:,headers:,lines,ignore-case,search:,lines,ignore-case,multi-search: \
               -n 'hgrep' -- "$@" )
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
@@ -87,19 +87,23 @@ while true; do
 		-h | --help) 	           # display help
                                 Help
 				                    exit;;
-		-H | --headers) 		     headers="$2"; Hflag=true; shift 2 ;;
+		-H | --headers) 		     headers="$2"; Hflag=true; shift 2  ;;
 		-l | --lines) 		        line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; shift ;;
 		-i | --ignore-case) 	     set="IGNORECASE=1;"; iflag=true; shift  ;;
 		-s | --search) 	        pattern="$2"; printer="print"; no=""; sflag=true; shift 2 ;;
-		-e | --multi-search) 	  entries+=($OPTARG); eflag=true; printer="print"; shift 2  ;;
+		-e | --multi-search) 	  entries+=($2); eflag=true; printer="print"; shift 2  ;;
 		#-F)                      Fflag=true; ;;
-      -f | --file)              myfile=$OPTARG; fflag=true; shift 2 ;;
+      -f | --file)              myfile="$2"; fflag=true; shift 2 ;;
+      shortlist)
+      echo -h --help option_2 shortlist
+      ;;
       -- ) shift; break ;;
        * ) break ;;
 	esac
 done
 echo "$OPTIND"
-shift $(( OPTIND + 0))
+shift $(( OPTIND +0))
+
 
 # echo "HERE HERE"
 # echo $OPTIND
