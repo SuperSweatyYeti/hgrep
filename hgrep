@@ -79,7 +79,7 @@ or=''
 # then
 #    Help
 # fi
-while getopts "f:H:lis:lie:h" opt; do
+while getopts "H:f:lis:lie:h" opt; do
 	case $opt in			
 		h) 	# display Help
             echo "Showing Help..."
@@ -102,7 +102,6 @@ while getopts "f:H:lis:lie:h" opt; do
 				exit;;
 	esac
 done
-echo "$OPTIND"
 shift $(( OPTIND + 0))
 
 # echo "HERE HERE"
@@ -203,7 +202,11 @@ fi
 
 # Strip quotes with sed
 entries=$(echo "${entries[@]}" | sed "s/'/ /g")
-# echo "$entries"
+
+# Strip quotes with sed
+myfile=$(echo "${myfile}" | sed "s/'/ /g")
+
+
 # strip empty space with sed
 entries=$(echo "$entries" | sed "s/\s//g")
 # escape special characters        //\//\\/
@@ -226,7 +229,7 @@ if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
 then
    if [[ "$fflag" == true ]]
    then
-	   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}' "$myfile"
+	   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}' $myfile
    else
       awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
    fi
