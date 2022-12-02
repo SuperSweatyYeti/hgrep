@@ -19,7 +19,7 @@ Help()
    echo "-h, --help           Display this help message"
    echo "-s, --search         Pattern to search for"
    echo "-e, --multi-search   Multiple search entries (hgrep -e foo -e bar)"
-   echo "-l, --lines          Toggle line numbers"
+   echo "-l, --lines          Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distinguish seperate lines"
    echo "-i, --ignore-case    Case-insensitive pattern search"
    echo "-H, --headers        Number of Header lines, Default is 1"
    echo
@@ -44,7 +44,7 @@ Help2()
    echo "-h     Display this help message"
    echo "-s     Pattern to search for"
    echo "-e     Multiple search entries (hgrep -e foo -e bar)"
-   echo "-l     Toggle line numbers"
+   echo "-l     Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distinguish seperate lines"
    echo "-i     Case-insensitive pattern search"
    echo "-H     Number of Header lines, Default is 1"
    echo
@@ -119,32 +119,15 @@ while true; do
        * ) break ;;
 	esac
 done
-echo "$OPTIND"
-shift $(( OPTIND +0))
+
+# shift $(( OPTIND +0))
 
 if (( OPTIND > 1))
 then
 echo "Invalid combination of options -- ($-) "
 fi
 
-
-
-# echo "HERE HERE"
 # echo $OPTIND
-
-
-# if (( OPTIND <= 2 ))
-# then
-#    echo "Not Enough arguments"
-# 	echo
-# 	Help
-# 	exit
-# elif (( OPTIND > 2)) && [[ "$qflag" == true ]]
-# then
-#    echo "Error: Invalid option detected"
-#    Help
-#    exit
-# fi
 
 if [[ "$sflag" == true ]] && [[ "$eflag" == true ]]
 then
@@ -156,11 +139,12 @@ fi
 #Check if headers option is set
 if [[ "$Hflag" == true ]]
 then
-	re='^[0-9]+$'
+   # Check if header argument is a positive numberical value
+   re='^[0-9]+$'
 	if [[ ! "$headers" =~ $re ]] || [[ "$headers" == "" ]]
 	then
-		echo "Not a Valid argument for -H need integer '0-9'"
-		Help2
+		echo "Not a Valid argument for -H need positive integer '0-9'"
+		Help
 		exit
 	fi
 fi
@@ -170,7 +154,7 @@ then
 	headers=1
 fi
 
-# CHeck if passing in file name
+# Check if passing in a file name
 if [[ "$fflag" == false ]]
 then
 # Check if stdin is empty otherwise awk will hang

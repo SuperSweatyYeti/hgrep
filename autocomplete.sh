@@ -1,5 +1,6 @@
+#!/bin/bash
 
-_script()
+_hgrep_completion()
 {
     local cur prev opts
     COMPREPLY=()
@@ -19,7 +20,7 @@ _script()
 
 }
 # Complete options -d for directories -f for files -F then name of function in this script last argument is location of bash script to bash complete for
-complete -d -f -o default -F _script ~/.local/share/bin/hgrep
+complete -d -f -o default -F _hgrep_completion hgrep
 
 
 
