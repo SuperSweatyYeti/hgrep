@@ -154,7 +154,7 @@ then
 	headers=1
 fi
 
-# Check if passing in a file name
+# Check if passing in a file name with -f option
 if [[ "$fflag" == false ]]
 then
 # Check if stdin is empty otherwise awk will hang
