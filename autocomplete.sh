@@ -10,11 +10,11 @@ _hgrep_completion()
     opts_multi="--multi-search -e"
     #echo ${COMP_LINE}
     # Stop showing options after selecting option that requires arguments
-    if [[ ${cur} == -* ]] && [[  ${COMP_LINE} != *--help* && ${COMP_LINE} != *--search* && ${COMP_LINE} != *--multi-search* ]] ; then
-        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    if [[ ${cur} == -* ]] && [[  ${COMP_LINE} != *--help* && ${COMP_LINE} != *--search* && ${COMP_LINE} != *--multi-search* && ${COMP_LINE} != *-e* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur} ) )
         return 0
     elif [[ ${cur} == -* ]] && [[  ${COMP_LINE} != *--help* && ${COMP_LINE} != *--search* ]] ; then
-        COMPREPLY=( $(compgen -W "${opts_multi}" -- ${cur}) )
+        COMPREPLY=( $(compgen -W "${opts_multi}" -- ${cur} ) )
         return 0
     fi
 

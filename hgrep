@@ -104,7 +104,7 @@ while true; do
 		-s | --search) 	        if [[ "$sflag" == false ]]; then sflag=true; else tooMany; exit; fi; pattern="$2"; printer="print"; no="";  shift 2 ;;
 		-e | --multi-search) 	  entries+=("$2"); eflag=true; printer="print"; shift 2  ;;
 		#-F)                      Fflag=true; ;;
-      -f | --file)              myfile="$2"; fflag=true; shift 2 ;;
+      -f | --file)              if [[ "$fflag" == false ]]; then myfile="$2"; fflag=true; shift 2; else tooMany; exit 1; fi; ;;
       # --complete)
       #    # shift 1
       #    if [[ "$TEMP" == *"help"* ]]; then
@@ -133,7 +133,7 @@ if [[ "$sflag" == true ]] && [[ "$eflag" == true ]]
 then
    echo "Invalid combination of arguments -s -e"
    Help
-   exit
+   exit 1
 fi
 
 #Check if headers option is set
@@ -143,9 +143,9 @@ then
    re='^[0-9]+$'
 	if [[ ! "$headers" =~ $re ]] || [[ "$headers" == "" ]]
 	then
-		echo "Not a Valid argument for -H need positive integer '0-9'"
+		echo "Not a valid argument for (-H | --headers)option, need positive integer '0-9'"
 		Help
-		exit
+		exit 1
 	fi
 fi
 
@@ -164,7 +164,7 @@ then
       : # no-op
    else
       NoInput
-      exit
+      exit 1
    fi
 fi
 
@@ -205,7 +205,7 @@ if [[ "$entries2" == "\\" ]] || [[ "$pattern" == "\\" ]]; then
    echo "Search pattern cannot be double backlash"
    echo "Try four backslashes to search for literal backslashes"
    Help
-   exit
+   exit 1
 fi
 
 
@@ -228,7 +228,7 @@ then
    : # no-op
 else
    echo "Search pattern cannot be empty type -h for help"
-   exit
+   exit 1
 fi
 
 # echo "${entries[@]}"
