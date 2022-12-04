@@ -18,6 +18,7 @@ Help()
    echo "-s, --search         Pattern to search for"
    echo "-e, --multi-search   Multiple search entries (hgrep -e foo -e bar)"
    echo "-l, --lines          Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distinguish seperate lines"
+   echo "-v, --invert-match   Print lines that DO NOT include specified pattern(s)"
    echo "-i, --ignore-case    Case-insensitive pattern search"
    echo "-H, --headers        Number of Header lines, Default is 1"
    echo
@@ -101,32 +102,10 @@ or=''
 #    Help
 # fi
 
-_hgrep_completion()
-{
-    local cur prev opts
-    COMPREPLY=()
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="--help --headers --lines --ignore-case --search --multi-search --file"
-    opts_multi="--multi-search -e"
-    #echo ${COMP_LINE}
-    # Stop showing options after selecting option that requires arguments
-    if [[ ${cur} == -* ]] && [[  ${COMP_LINE} != *--help* && ${COMP_LINE} != *--search* && ${COMP_LINE} != *--multi-search* && ${COMP_LINE} != *-e* ]] ; then
-        COMPREPLY=( $(compgen -W "${opts}" -- ${cur} ) )
-        return 0
-    elif [[ ${cur} == -* ]] && [[  ${COMP_LINE} != *--help* && ${COMP_LINE} != *--search* ]] ; then
-        COMPREPLY=( $(compgen -W "${opts_multi}" -- ${cur} ) )
-        return 0
-    fi
-
-}
-# Complete options -d for directories -f for files -F then name of function in this script last argument is location of bash script to bash complete for
-complete -d -f -o default -F _hgrep_completion hgrep
-
 
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
 # separately; see below.
-TEMP=$(getopt -o hf:H:lis:e: --long help,file:,headers:,lines,ignore-case,search:,lines,ignore-case,multi-search: \
+TEMP=$(getopt -o hf:H:livs:e: --long invert-match,help,file:,headers:,lines,ignore-case,search:,lines,ignore-case,multi-search: \
               -n 'hgrep' -- "$@" )
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
@@ -141,7 +120,7 @@ while true; do
 				                    exit;;
 		-H | --headers) 		     headers="$2"; Hflag=true; shift 2  ;;
 		-l | --lines) 		        line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; shift ;;
-      -v | --invert-match) 	  shift ::
+      -v | --invert-match) 	  vflag=true; invert="!"; shift ;;
 		-i | --ignore-case) 	     set="IGNORECASE=1;"; iflag=true; shift  ;;
 		-s | --search) 	        if [[ "$sflag" == false ]]; then sflag=true; else tooMany; exit 1; fi; pattern="$2"; printer="print"; no="";  shift 2 ;;
 		-e | --multi-search) 	  entries+=("$2"); eflag=true; printer="print"; shift 2  ;;
@@ -288,17 +267,15 @@ entries=$(echo "$entries" | sed "s/\s//g")
 # echo "${entries[@]}"
 
 # if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
-if [[ "$pattern" != '' ]]
+
+# Check for invert match and filename before defining awk command
+if [[ "$vflag" == false ]]
 then
-   if [[ "$fflag" == true ]]
-   then
-	   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}' $myfile
-   else
-      awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
-   fi
-else
-	NoInput
-	exit 1
+   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}' $myfile
+elif [[ "$vflag" == true ]]
+then
+   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } !/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/  {'"$printer"' '"$line2"' '"$line3"'}' $myfile
 fi
+
 
 # Multiple Entries  (sadf)|(asdf)|(asd)
