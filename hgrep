@@ -28,7 +28,15 @@ Help()
    echo "lsblk | hgrep sda "
    echo "lsblk | hgrep -H 1 -lis nvme0n1"
    echo "hgrep -f /etc/hosts -H 5 -li -e "example.com" -e "acme.com" "
+   echo 
+   echo "Do not use header AND include first line in search results"
+   echo "hgrep -f /etc/hosts -H 0 -s Loopback"
+   echo "Specific Special character searches that need to be preceded by triple backslashes"
+   echo "[\\][|]"
+   echo "Search for literal \\ by using quadruple backslashes"
+   echo "Other special character searches need to be preceded by single \\"
    echo
+  
 }
 
 Help2()
@@ -129,6 +137,7 @@ while true; do
 	esac
 done
 
+
 # shift $(( OPTIND +0))
 
 if (( OPTIND > 1))
@@ -222,7 +231,11 @@ fi
 
 # Strip quotes with sed
 entries=$(echo "${entries[@]}" | sed "s/'/ /g")
-# echo "$entries"
+
+# Strip quotes with sed
+myfile=$(echo "${myfile}" | sed "s/'/ /g")
+
+
 # strip empty space with sed
 entries=$(echo "$entries" | sed "s/\s//g")
 # escape special characters        //\//\\/
