@@ -86,6 +86,7 @@ tooManySearch()
 
 lflag=false
 iflag=false
+vflag=false
 sflag=false
 eflag=false
 hflag=false
@@ -140,6 +141,7 @@ while true; do
 				                    exit;;
 		-H | --headers) 		     headers="$2"; Hflag=true; shift 2  ;;
 		-l | --lines) 		        line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; shift ;;
+      -v | --invert-match) 	  shift ::
 		-i | --ignore-case) 	     set="IGNORECASE=1;"; iflag=true; shift  ;;
 		-s | --search) 	        if [[ "$sflag" == false ]]; then sflag=true; else tooMany; exit 1; fi; pattern="$2"; printer="print"; no="";  shift 2 ;;
 		-e | --multi-search) 	  entries+=("$2"); eflag=true; printer="print"; shift 2  ;;
