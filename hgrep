@@ -40,28 +40,6 @@ Help()
   
 }
 
-Help2()
-{
-   # Display Help
-   echo
-   echo "The order to use flags is as follows"
-   echo
-   echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern" "
-   echo "options:"
-   echo
-   echo "-h     Display this help message"
-   echo "-s     Pattern to search for"
-   echo "-e     Multiple search entries (hgrep -e foo -e bar)"
-   echo "-l     Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distinguish seperate lines"
-   echo "-i     Case-insensitive pattern search"
-   echo "-H     Number of Header lines, Default is 1"
-   echo
-   echo
-   echo "Examples:"
-   echo
-   echo "lsblk | hgrep -H 1 -lis nvme0n1"
-   echo
-}
 
 NoInput()
 {
