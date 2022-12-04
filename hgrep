@@ -31,7 +31,7 @@ Help()
    echo 
    echo "Do not use header AND include first line in search results"
    echo "hgrep -f /etc/hosts -H 0 -s Loopback"
-   echo "Specific Special character searches that need to be preceded by triple backslashes"
+   echo "Specific Special character searches that need to be preceded by triple backslashes or single backslash inside doublequotes"
    echo "[\\][|]"
    echo "Search for literal \\ by using quadruple backslashes"
    echo "Other special character searches need to be preceded by single \\"
