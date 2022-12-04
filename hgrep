@@ -1,27 +1,31 @@
 #!/bin/bash
 
-
-############################################################
 # Help                                                     #
 ############################################################
 Help()
 {
    # Display Help
-   echo
-   echo "The order to use flags is as follows"
-   echo
-   echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern"]"
-   echo "options:"
+   echo "Usage: hgrep OPTIONS... [FILE] PATTERN(S)"
+   echo "Search for PATTERN(S) in file or STDOUT"
+   echo "Can search for multiple PATTERNS"
    echo 
-   echo "-h     Display this help message"
-   echo "-s     Pattern to search for"
-   echo "-e     Multiple search entries (hgrep -e foo -e bar)"
-   echo "-l     Toggle line numbers"
-   echo "-i     Case-insensitive pattern search"
-   echo "-H     Number of Header lines, Default is 1"
+   echo "The recommended order to use flags is as follows"
+   echo "hgrep -H "0-9" -l -i -f myfile (-s or -e) PATTERN(S) "
+   echo 
+   echo "Options:"
+   echo 
+   echo "-h, --help           Display this help message"
+   echo "-s, --search         Pattern to search for"
+   echo "-e, --multi-search   Multiple search entries (hgrep -e foo -e bar)"
+   echo "-l, --lines          Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distinguish seperate lines"
+   echo "-i, --ignore-case    Case-insensitive pattern search"
+   echo "-H, --headers        Number of Header lines, Default is 1"
    echo
-   echo "Examples:"
-   echo
+   echo "Example syntax: hgrep -li -f /path/to/myfile -s "pattern" "                    
+   echo "Example syntax: hgrep -H 2 -li -f /etc/hosts -e "example.com" -e "acme.com" "
+   echo 
+   echo "More Examples: "
+   echo "lsblk | hgrep sda "
    echo "lsblk | hgrep -H 1 -lis nvme0n1"
    echo "hgrep -f /etc/hosts -H 5 -li -e "example.com" -e "acme.com" "
    echo 
@@ -41,13 +45,13 @@ Help2()
    echo
    echo "The order to use flags is as follows"
    echo
-   echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern"]"
+   echo "Syntax: scriptTemplate [hgrep (-l and/or -i) -s "pattern" "
    echo "options:"
    echo
    echo "-h     Display this help message"
    echo "-s     Pattern to search for"
    echo "-e     Multiple search entries (hgrep -e foo -e bar)"
-   echo "-l     Toggle line numbers"
+   echo "-l     Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distinguish seperate lines"
    echo "-i     Case-insensitive pattern search"
    echo "-H     Number of Header lines, Default is 1"
    echo
@@ -62,16 +66,32 @@ NoInput()
 {
    # Display NoInput
    echo
-   echo "Need to pass a file or command use -h for help"
+   echo "Need to pass a file or command use "hgrep -h" for help"
+   echo
+}
+
+tooMany()
+{
+   echo 'Invalid combination of options --   '
+   echo "Type "hgrep -h" for help"
+   echo
+}
+
+tooManySearch()
+{
+   echo "Can only search for a single pattern unless "-e or --multi-search" is specified"
+   echo "Type "hgrep -h" for help"
+   echo
 }
 
 lflag=false
 iflag=false
 sflag=false
 eflag=false
+hflag=false
 Hflag=false
 qflag=false
-Fflag=false
+fflag=false
 entries=()
 or=''
 # If number of arguments is 0 Help message
@@ -79,62 +99,70 @@ or=''
 # then
 #    Help
 # fi
-while getopts "H:f:lis:lie:h" opt; do
-	case $opt in			
-		h) 	# display Help
-            echo "Showing Help..."
-				Help 
-				exit;;
-		H) 		headers=$OPTARG; Hflag=true; ;;
-		l) 		line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; ;;
-		i) 		set="IGNORECASE=1;"; iflag=true;  ;;
-		s) 		pattern=$OPTARG; printer="print"; no=""; sflag=true; ;;
-		e) 		entries+=($OPTARG); eflag=true; printer="print";  ;;
-		#F)    Fflag=true; ;;
-      f)    myfile=$OPTARG; fflag=true; ;;
-      \?) 	# Invalid option
-            qflag=true
-				echo "Error: Invalid option detected -$OPTARG"
-				Help
-				exit;;
-		:)		echo "Option -$OPTARG requires an argument." >&2
-				Help
-				exit;;
+
+# NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
+# separately; see below.
+TEMP=$(getopt -o hf:H:lis:e: --long help,file:,headers:,lines,ignore-case,search:,lines,ignore-case,multi-search: \
+              -n 'hgrep' -- "$@" )
+
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+# Note the quotes around '$TEMP': they are essential!
+eval set -- "$TEMP"
+
+while true; do	
+   case "$1" in
+		-h | --help) 	           hflag=true # display help
+                                Help
+				                    exit;;
+		-H | --headers) 		     headers="$2"; Hflag=true; shift 2  ;;
+		-l | --lines) 		        line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; shift ;;
+		-i | --ignore-case) 	     set="IGNORECASE=1;"; iflag=true; shift  ;;
+		-s | --search) 	        if [[ "$sflag" == false ]]; then sflag=true; else tooMany; exit 1; fi; pattern="$2"; printer="print"; no="";  shift 2 ;;
+		-e | --multi-search) 	  entries+=("$2"); eflag=true; printer="print"; shift 2  ;;
+		#-F)                      Fflag=true; ;;
+      -f | --file)              if [[ "$fflag" == false ]]; then myfile="$2"; fflag=true; shift 2; else tooMany; exit 1; fi; ;;
+      # --complete)
+      #    # shift 1
+      #    if [[ "$TEMP" == *"help"* ]]; then
+      #    echo 
+      #    exit
+      #    else
+      #    echo --help --headers --lines --ignore-case --search --multi-search --file
+      #    exit
+      #    fi
+      #    ;;
+      -- ) shift; break ;;
+       * ) break ;;
 	esac
 done
-shift $(( OPTIND + 0))
 
-# echo "HERE HERE"
+
+# shift $(( OPTIND +0))
+
+if (( OPTIND > 1))
+then
+echo "Invalid combination of options -- ($-) "
+fi
+
 # echo $OPTIND
 
-if (( OPTIND <= 2 ))
+if [[ "$sflag" == true && "$eflag" == true ]]
 then
-   echo "Not Enough arguments"
-	echo
-	Help
-	exit
-elif (( OPTIND > 2)) && [[ "$qflag" == true ]]
-then
-   echo "Error: Invalid option detected"
-   Help
-   exit
+   tooMany
+   exit 1
 fi
 
-if [[ "$sflag" == true ]] && [[ "$eflag" == true ]]
-then
-   echo "Invalid combination of arguments -s -e"
-   Help
-   exit
-fi
-
+#Check if headers option is set
 if [[ "$Hflag" == true ]]
 then
-	re='^[0-9]+$'
-	if [[ ! "$headers" =~ $re ]] || [[ "$headers" == "" ]]
+   # Check if header argument is a positive numberical value
+   re='^[0-9]+$'
+	if [[ ! "$headers" =~ $re || "$headers" == "" ]]
 	then
-		echo "Not a Valid argument for -H need integer '0-9'"
-		Help2
-		exit
+		echo "Not a valid argument for (-H | --headers)option, need positive integer '0-9'"
+		Help
+		exit 1
 	fi
 fi
 
@@ -143,7 +171,7 @@ then
 	headers=1
 fi
 
-# CHeck if passing in file name
+# Check if passing in a file name with -f option
 if [[ "$fflag" == false ]]
 then
 # Check if stdin is empty otherwise awk will hang
@@ -153,9 +181,10 @@ then
       : # no-op
    else
       NoInput
-      exit
+      exit 1
    fi
 fi
+
 # echo "${entries[@]}"
 max="${#entries[@]}"
 maxless=$(("$max" - 1)) 
@@ -188,12 +217,12 @@ done
 entries2=$(echo "${entries[@]}" | sed "s/[()]//g")
 #String Filtering
 string="$entries2"
-if [[ "$string" == "\\" ]] || [[ "$pattern" == "\\" ]]; then
+if [[ "$entries2" == "\\" || "$pattern" == "\\" ]]; then
    echo "does equal"
    echo "Search pattern cannot be double backlash"
    echo "Try four backslashes to search for literal backslashes"
    Help
-   exit
+   exit 1
 fi
 
 
@@ -214,18 +243,26 @@ entries=$(echo "$entries" | sed "s/\s//g")
 # echo "HERE"
 # echo "$entries"
 
-
-if [[ "$sflag" == true ]] || [[ "$eflag" == true ]] && [[ ! "$pattern" == '' ]] || [[ ! "$entries" == '' ]]
+# Check if used -s flag to specify search; If not then assume that the input after hgrep [NY OPTIONS] IS the search pattern
+if [[ "$sflag" == true && "$pattern" != '' ]]  ||  [[ "$eflag" == true  && "$entries" != '' ]]
 then
-   : # no-op
+   : # no-op and continue
+# Check that we don't have multiple search patterns seperated by spaces; $2 is the second input
+elif [[ "$sflag" == false  &&  "$eflag" == false  && $2 == '' && "$pattern" == '' ]]
+then
+   # echo "assigning $1 to pattern"
+   pattern=$1
+   printer="print"
 else
-   echo "Search pattern cannot be empty use [hgrep -h] for help"
-   exit
+   tooManySearch
+   exit 1
 fi
+
 
 # echo "${entries[@]}"
 
-if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
+# if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
+if [[ "$pattern" != '' ]]
 then
    if [[ "$fflag" == true ]]
    then
@@ -234,8 +271,8 @@ then
       awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}'
    fi
 else
-	Help
-	exit
+	NoInput
+	exit 1
 fi
 
 # Multiple Entries  (sadf)|(asdf)|(asd)
