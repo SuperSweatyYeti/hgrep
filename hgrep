@@ -14,13 +14,14 @@ Help()
    echo 
    echo "Options:"
    echo 
-   echo "-h, --help           Display this help message"
-   echo "-s, --search         Pattern to search for"
-   echo "-e, --multi-search   Multiple search entries (hgrep -e foo -e bar)"
-   echo "-l, --lines          Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distinguish seperate lines"
-   echo "-v, --invert-match   Print lines that DO NOT include specified pattern(s)"
-   echo "-i, --ignore-case    Case-insensitive pattern search"
-   echo "-H, --headers        Number of Header lines, Default is 1"
+   echo "-h, --help              Display this help message"
+   echo "-s, --search            Pattern to search for"
+   echo "-e, --multi-search      Multiple search entries (hgrep -e foo -e bar)"
+   echo "-l, --lines             Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distinguish seperate lines"
+   echo "-c, --correspond-lines  Toggle line number that DO correspond to line in file"
+   echo "-v, --invert-match      Print lines that DO NOT include specified pattern(s)"
+   echo "-i, --ignore-case       Case-insensitive pattern search"
+   echo "-H, --headers           Number of Header lines, Default is 1"
    echo
    echo "Example syntax: hgrep -li -f /path/to/myfile -s "pattern" "                    
    echo "Example syntax: hgrep -H 2 -li -f /etc/hosts -e "example.com" -e "acme.com" "
@@ -32,6 +33,10 @@ Help()
    echo 
    echo "Do not use header AND include first line in search results"
    echo "hgrep -f /etc/hosts -H 0 -s Loopback"
+   echo 
+   echo "Search through all files that begin with "temp" "
+   echo "hgrep -f "/dir/subdir/temp*" -s pattern "
+   echo 
    echo "Specific Special character searches that need to be preceded by triple backslashes or single backslash inside doublequotes"
    echo "[\\][|]"
    echo "Search for literal \\ by using quadruple backslashes"
@@ -64,6 +69,7 @@ tooManySearch()
 }
 
 lflag=false
+cflag=false
 iflag=false
 vflag=false
 sflag=false
@@ -83,7 +89,7 @@ or=''
 
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
 # separately; see below.
-TEMP=$(getopt -o hf:H:livs:e: --long invert-match,help,file:,headers:,lines,ignore-case,search:,lines,ignore-case,multi-search: \
+TEMP=$(getopt -o hf:H:lcivs:e: --long invert-match,help,file:,headers:,lines,correspond-lines,ignore-case,search:,lines,ignore-case,multi-search: \
               -n 'hgrep' -- "$@" )
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
@@ -97,7 +103,8 @@ while true; do
                                 Help
 				                    exit;;
 		-H | --headers) 		     headers="$2"; Hflag=true; shift 2  ;;
-		-l | --lines) 		        line1=" i=1"; line2="\"\\033[31m\"i\":\"\"\\033[0m\","; line3=" \$0 ; i++"; lflag=true; shift ;;
+		-c | --count-lines) 		  cline1=" i=1"; cline2="\"\\033[93m\"i\":\"\"\\033[0m\","; cline3=" \$0 ; i++"; cflag=true; shift ;;
+      -l | --lines)             line1="\"\\033[96m\"FNR\":\"\"\\033[0m\","; line2=" \$0" ; lflag=true ; shift ;;
       -v | --invert-match) 	  vflag=true; invert="!"; shift ;;
 		-i | --ignore-case) 	     set="IGNORECASE=1;"; iflag=true; shift  ;;
 		-s | --search) 	        if [[ "$sflag" == false ]]; then sflag=true; else tooMany; exit 1; fi; pattern="$2"; printer="print"; no="";  shift 2 ;;
@@ -130,6 +137,12 @@ fi
 # echo $OPTIND
 
 if [[ "$sflag" == true && "$eflag" == true ]]
+then
+   tooMany
+   exit 1
+fi
+
+if [[ "$cflag" == true && "$lflag" == true ]]
 then
    tooMany
    exit 1
@@ -249,10 +262,10 @@ entries=$(echo "$entries" | sed "s/\s//g")
 # Check for invert match and filename before defining awk command
 if [[ "$vflag" == false ]]
 then
-   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[31m&\033[0m")  {'"$printer"' '"$line2"' '"$line3"'}' $myfile
+   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$cline1"' } gsub(/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/, "\033[91m&\033[0m")  {'"$printer"' '"$line1"' '"$line2"' '"$cline2"' '"$cline3"'}' $myfile
 elif [[ "$vflag" == true ]]
 then
-   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } !/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/  {'"$printer"' '"$line2"' '"$line3"'}' $myfile
+   awk 'FNR<='"$headers"'{print; next} BEGIN{IGNORECASE=0; '"$set"' '"$line1"' } !/'"${entries//\//\\/}"''"${pattern//\//\\/}"'/  {'"$printer"' '"$cline1"' '"$cline2"' '"$line2"' '"$line3"'}' $myfile
 fi
 
 

@@ -6,7 +6,7 @@ _hgrep_completion()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="--help --headers --file --ignore-case --invert-match --lines --multi-search --search"
+    opts="--help --headers --file --ignore-case --invert-match --lines --count-lines --multi-search --search"
     opts_multi="--multi-search -e"
     #echo ${COMP_LINE}
     # Stop showing options after selecting option that requires arguments
