@@ -18,6 +18,7 @@ Options:
 -h, --help              Display this help message
 -s, --search            Pattern to search for
 -e, --multi-search      Multiple search entries (hgrep -e foo -e bar)
+-l, --lines             Toggle line numbers that DO correspond to the line in file
 -c, --count-lines       Toggle line numbers that DO NOT correspond to line in file. Useful to quickly see number of matches or clearly distringuish each matched line
 -v, --invert-match      Print lines that DO NOT include specified pattern(s)
 -i, --ignore-case       Case-insensitive pattern search
