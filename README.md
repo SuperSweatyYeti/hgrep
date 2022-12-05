@@ -39,11 +39,3 @@ Leveraging awk.
 "Other special character searches need to be preceded by single \\"
 ```
 
-
-
-
-
-
-
-
-test3 merge
