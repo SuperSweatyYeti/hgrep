@@ -79,12 +79,7 @@ Hflag=false
 qflag=false
 fflag=false
 entries=()
-or=''
-# If number of arguments is 0 Help message
-# if (($# == 0))
-# then
-#    Help
-# fi
+
 
 
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
@@ -99,30 +94,34 @@ eval set -- "$TEMP"
 
 while true; do	
    case "$1" in
-		-h | --help) 	           hflag=true # display help
-                                Help
-				                    exit;;
-		-H | --headers) 		     headers="$2"; Hflag=true; shift 2  ;;
-		-c | --count-lines) 		  cline1=" i=1"; cline2="\"\\033[93m\"i\":\"\"\\033[0m\","; cline3=" \$0 ; i++"; cflag=true; shift ;;
-      -l | --lines)             line1="\"\\033[96m\"FNR\":\"\"\\033[0m\","; line2=" \$0" ; lflag=true ; shift ;;
-      -v | --invert-match) 	  vflag=true; invert="!"; shift ;;
-		-i | --ignore-case) 	     set="IGNORECASE=1;"; iflag=true; shift  ;;
-		-s | --search) 	        if [[ "$sflag" == false ]]; then sflag=true; else tooMany; exit 1; fi; pattern="$2"; printer="print"; no="";  shift 2 ;;
-		-e | --multi-search) 	  entries+=("$2"); eflag=true; printer="print"; shift 2  ;;
-		#-F)                      Fflag=true; ;;
-      -f | --file)              if [[ "$fflag" == false ]]; then myfile="$2"; fflag=true; shift 2; else tooMany; exit 1; fi; ;;
-      # --complete)
-      #    # shift 1
-      #    if [[ "$TEMP" == *"help"* ]]; then
-      #    echo 
-      #    exit
-      #    else
-      #    echo --help --headers --lines --ignore-case --search --multi-search --file
-      #    exit
-      #    fi
-      #    ;;
-      -- ) shift; break ;;
-       * ) break ;;
+		-h | --help) 	         hflag=true ;# display help
+                              Help ;
+                              exit ;;
+		-H | --headers) 		   headers="$2"; Hflag=true; shift 2 ;;
+		-c | --count-lines) 		cline1=" i=1"; cline2="\"\\033[93m\"i\":\"\"\\033[0m\",";
+                              cline3=" \$0 ; i++"; cflag=true; shift ;;
+      -l | --lines)           line1="\"\\033[96m\"FNR\":\"\"\\033[0m\",";
+                              line2=" \$0" ; lflag=true ; shift ;;
+      -v | --invert-match) 	vflag=true; invert="!"; shift ;;
+		-i | --ignore-case) 	   set="IGNORECASE=1;"; iflag=true; shift ;;
+		-s | --search) 	      if [[ "$sflag" == false ]]; then
+                                 sflag=true;
+                              else
+                                 tooMany;
+                                 exit 1;
+                              fi;
+                              pattern="$2"; printer="print"; shift 2 ;;
+		-e | --multi-search) 	entries+=("$2"); eflag=true; printer="print"; shift 2 ;;
+      -f | --file)            if [[ "$fflag" == false ]]; then
+                                 myfile="$2";
+                                 fflag=true;
+                                 shift 2;
+                              else
+                                 tooMany;
+                                 exit 1;
+                              fi; ;;
+      -- )                    shift; break ;;
+      * )                     break ;;
 	esac
 done
 
@@ -136,12 +135,13 @@ fi
 
 # echo $OPTIND
 
+# Either --search or --multi-search NOT both
 if [[ "$sflag" == true && "$eflag" == true ]]
 then
    tooMany
    exit 1
 fi
-
+# Either --lines or --count-lines NOT both
 if [[ "$cflag" == true && "$lflag" == true ]]
 then
    tooMany
@@ -159,12 +159,11 @@ then
 		Help
 		exit 1
 	fi
+# Default number of headers is 1 if not specified
+else
+headers=1
 fi
 
-if [[  "$Hflag" == false ]]
-then
-	headers=1
-fi
 
 # Check if passing in a file name with -f option
 if [[ "$fflag" == false ]]
@@ -185,7 +184,8 @@ max="${#entries[@]}"
 maxless=$(("$max" - 1)) 
 # echo "$max"
 
-
+# Loop through "entries" and add or operator "|" to each one except the last one
+# so that we can add the entire new string to the awk search pattern section
 for (( i=0; i < "$max"; i++ ))
 do
    # echo "$i"
@@ -197,18 +197,7 @@ do
    entries[i]=(${entries[$i]})'|'
 done
 
-# for entry in "${entries[@]}"
-# do
-#    echo "$entry"
-#    if [[ "$entry" == "$last"  ]]
-#    then
-#       entry=\("$entry"\)
-#       continue
-#    fi
-#    entry=("$entry")'|'
-# done
-
-# Check if used -s flag to specify search; If not then assume that the input after hgrep [NY OPTIONS] IS the search pattern
+# Check if used -s flag to specify search; If not then assume that the input after hgrep [OPTIONS] IS the search pattern
 if [[ "$sflag" == true && "$pattern" != '' ]]  ||  [[ "$eflag" == true  && "$entries" != '' ]]
 then
    : # no-op and continue
@@ -235,8 +224,6 @@ if [[ "$entries2" == "\\" || "$pattern" == "\\" ]]; then
 fi
 
 
-# echo "${entries[@]}"
-# echo "$pattern"
 
 # Strip quotes with sed
 entries=$(echo "${entries[@]}" | sed "s/'/ /g")
@@ -244,20 +231,11 @@ entries=$(echo "${entries[@]}" | sed "s/'/ /g")
 # Strip quotes with sed
 myfile=$(echo "${myfile}" | sed "s/'/ /g")
 
-
 # strip empty space with sed
 entries=$(echo "$entries" | sed "s/\s//g")
-# escape special characters        //\//\\/
-# entries=$(echo "$entries" | sed "s//\//\\/g")
-# echo "HERE"
-# echo "$entries"
 
 
 
-
-# echo "${entries[@]}"
-
-# if [[ "$sflag" == true ]] || [[  "$eflag" == true ]]
 
 # Check for invert match and filename before defining awk command
 if [[ "$vflag" == false ]]
