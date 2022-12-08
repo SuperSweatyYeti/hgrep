@@ -42,7 +42,6 @@ Help()
    echo "Search for literal \\ by using quadruple backslashes"
    echo "Other special character searches need to be preceded by single \\"
    echo
-  
 }
 
 
@@ -84,7 +83,7 @@ entries=()
 
 # NOTE: This requires GNU getopt.  On Mac OS X and FreeBSD, you have to install this
 # separately; see below.
-TEMP=$(getopt -o hf:H:lcivs:e: --long invert-match,help,file:,headers:,lines,correspond-lines,ignore-case,search:,lines,ignore-case,multi-search: \
+TEMP=$(getopt -o hf:H:lcivs:e: --long invert-match,help,file:,headers:,lines,count-lines,ignore-case,search:,multi-search: \
               -n 'hgrep' -- "$@" )
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
@@ -92,26 +91,26 @@ if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 # Note the quotes around '$TEMP': they are essential!
 eval set -- "$TEMP"
 
-while true; do	
+while true; do
    case "$1" in
-		-h | --help) 	         hflag=true ;# display help
+		-h | --help)            hflag=true ;# display help
                               Help ;
                               exit ;;
-		-H | --headers) 		   headers="$2"; Hflag=true; shift 2 ;;
-		-c | --count-lines) 		cline1=" i=1"; cline2="\"\\033[93m\"i\":\"\"\\033[0m\",";
+		-H | --headers)         headers="$2"; Hflag=true; shift 2 ;;
+		-c | --count-lines)     cline1=" i=1"; cline2="\"\\033[93m\"i\":\"\"\\033[0m\",";
                               cline3=" \$0 ; i++"; cflag=true; shift ;;
       -l | --lines)           line1="\"\\033[96m\"FNR\":\"\"\\033[0m\",";
                               line2=" \$0" ; lflag=true ; shift ;;
-      -v | --invert-match) 	vflag=true; invert="!"; shift ;;
-		-i | --ignore-case) 	   set="IGNORECASE=1;"; iflag=true; shift ;;
-		-s | --search) 	      if [[ "$sflag" == false ]]; then
+      -v | --invert-match)    vflag=true; invert="!"; shift ;;
+		-i | --ignore-case)     set="IGNORECASE=1;"; iflag=true; shift ;;
+      -s | --search)          if [[ "$sflag" == false ]]; then
                                  sflag=true;
                               else
                                  tooMany;
                                  exit 1;
                               fi;
                               pattern="$2"; printer="print"; shift 2 ;;
-		-e | --multi-search) 	entries+=("$2"); eflag=true; printer="print"; shift 2 ;;
+		-e | --multi-search)    entries+=("$2"); eflag=true; printer="print"; shift 2 ;;
       -f | --file)            if [[ "$fflag" == false ]]; then
                                  myfile="$2";
                                  fflag=true;
