@@ -120,13 +120,12 @@ while true; do
                                  exit 1;
                               fi; ;;
       -- )                    shift; break ;;
-      * )                     break ;;
+      * )                     break ;;:
 	esac
 done
 
-
 # shift $(( OPTIND +0))
-
+shif
 if (( OPTIND > 1))
 then
 echo "Invalid combination of options -- ($-) "
