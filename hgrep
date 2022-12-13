@@ -125,7 +125,6 @@ while true; do
 done
 
 # shift $(( OPTIND +0))
-shif
 if (( OPTIND > 1))
 then
 echo "Invalid combination of options -- ($-) "
