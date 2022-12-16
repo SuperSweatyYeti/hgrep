@@ -118,14 +118,10 @@ while true; do
       * )                     break ;;
 	esac
 done
-echo "$1"
 exit
 
 # shift $(( OPTIND +0))
-<<<<<<< HEAD
-=======
 
->>>>>>> d471fa1 (modified Usage/help)
 if (( OPTIND > 1))
 then
 echo "Invalid combination of options -- ($-) "
