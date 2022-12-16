@@ -38,10 +38,5 @@ hgrep -f /etc/hosts -H 0 -s Loopback
 Search through all files that begin with "temp" 
 hgrep -f "/dir/subdir/temp*" -s pattern 
 
-Specific Special character searches that need to be preceded by triple backslashes or single backslash
-[\\][|]
-
-Search for literal \\ by using quadruple backslashes
-Other special character searches need to be preceded by single backslash
 ```
 
